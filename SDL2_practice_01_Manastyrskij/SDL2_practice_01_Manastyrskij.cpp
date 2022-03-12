@@ -70,36 +70,39 @@ void CircleUp(int x_circle, int y_circle, int r)
 	}
 }
 
-void Snowman() // Center
+void Snowman(int x) // Center (h)
 {
+	int y = h / 2;
+	int r = 90;
+
 	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255); // White
 
-	for (int i = 0; i < 90; i++) // R = 90
-		Circle(w / 2, h / 2, 90 - i); // big circle
+	for (int i = 0; i < r; i++) // R = 90
+		Circle(x, y, r - i); // big circle
 
-	for (int i = 0; i < 60; i++) // R = 60
-		Circle(w / 2, h / 4, 60 - i); // medium circle
+	for (int i = 0; i < r / 1.5; i++) // R = 60
+		Circle(x, y / 2, r / 1.5 - i); // medium circle
 
-	for (int i = 0; i < 30; i++) // R = 30
-		Circle(w / 2, h / 10, 30 - i); // small circle
+	for (int i = 0; i < r / 3; i++) // R = 30
+		Circle(x, y / 5, r / 3 - i); // small circle
 
 
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); // Black
 
 	for (int i = 0, j = 15; i < 3; i++, j += 30)
-		for (int k = 0; k < 9; k++) // R = 9
-			Circle(w / 2, h / 3 - j, 9 - k); // button
+		for (int k = 0; k < r / 10; k++) // R = 9
+			Circle(x, y / 1.5 - j, r / 10 - k); // button
 
 	for (int i = 0, k = -10; i < 2; i++, k += 20)
-		for (int j = 0; j < 6; j++) // R = 6
-			Circle(w / 2 + k, h / 12, 6 - j); // eyes
+		for (int j = 0; j < r / 15; j++) // R = 6
+			Circle(x + k, y / 6, r / 15 - j); // eyes
 
 	for (int i = -40, j = -90, k = 0; k < 2; i += 80, j += 180, k++)
-		SDL_RenderDrawLine(renderer, w / 2 + i, h / 5, w / 2 + j, h / 5 + 50); //hands
+		SDL_RenderDrawLine(renderer, x + i, y / 2.5, x + j, y / 2.5 + 50); //hands
 
 	for (int i = 0, j = -50; i < 2; i++, j += 100)
-		for (int k = 0; k < 45; k++) // R = 45
-			CircleUp(w / 2 + j, h / 1.535, 45 - k); // legs
+		for (int k = 0; k < r / 2; k++) // R = 45
+			CircleUp(x + j, y / 0.7675, r / 2 - k); // legs 1.535
 }
 
 void Ornament()
@@ -113,7 +116,7 @@ int main(int argc, char* argv[])
 
 	Background(100, 100, 100); // Gray
 
-	Snowman();
+	Snowman(w / 2);
 
 	SDL_RenderPresent(renderer);
 	system("pause");

@@ -98,16 +98,52 @@ void Snowman(int x) // Center (h)
 			Circle(x + k, y / 6, r / 15 - j); // eyes
 
 	for (int i = -40, j = -90, k = 0; k < 2; i += 80, j += 180, k++)
-		SDL_RenderDrawLine(renderer, x + i, y / 2.5, x + j, y / 2.5 + 50); //hands
+		SDL_RenderDrawLine(renderer, x + i, y / 2.5, x + j, y / 2.5 + 50); // hands
 
 	for (int i = 0, j = -50; i < 2; i++, j += 100)
 		for (int k = 0; k < r / 2; k++) // R = 45
-			CircleUp(x + j, y / 0.7675, r / 2 - k); // legs 1.535
+			CircleUp(x + j, y / 0.7675, r / 2 - k); // legs
 }
 
-void Ornament()
+void Ornament(int amount)
 {
+	int rectW = 100, rectH = 15, rectWsmall = 45, rectHsmall = 10;
+	SDL_Rect rect; // x y w h
 
+	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); // Black
+
+	if (amount > w / rectW) amount = w / rectW;
+
+	for (int i = 0; i < amount * rectW; i += rectW)
+	{
+		rect.w = rectW, rect.h = rectH;
+		for (int j = 0; j <= 195; j += 195) // 195
+		{
+			rect.x = i;
+			rect.y = h - rectH - j;
+			SDL_RenderFillRect(renderer, &rect);
+		}
+
+		rect.w = rectH, rect.h = rectW + 30; // 30
+
+		for (int j = 0, k = 0; j <= 50; j += 50) // 50 80 30
+		{
+			rect.x = rectH + j + i;
+			rect.y = h - rectH - rectW - k - 30; // 30
+			SDL_RenderFillRect(renderer, &rect);
+			k = 80 - 30;
+		}
+
+		rect.w = rectWsmall, rect.h = rectHsmall;
+
+		for (int j = 0, k = 0; j <= 50; j += 50) // 50 30
+		{
+			rect.x = i + j;
+			rect.y = h - rectH - rectW - rectHsmall + k;
+			SDL_RenderFillRect(renderer, &rect);
+			k = 30;
+		}
+	}
 }
 
 int main(int argc, char* argv[])
@@ -118,8 +154,10 @@ int main(int argc, char* argv[])
 
 	Snowman(w / 2);
 
+	Ornament(8);
+
 	SDL_RenderPresent(renderer);
-	system("pause");
+	SDL_Delay(5000);
 	DeInit(0);
 	return 0;
 }

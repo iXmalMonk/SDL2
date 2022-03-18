@@ -11,6 +11,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SDL2_03_lab_Manastyrskij", 
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SDL2_practice_01_Manastyrskij", "SDL2_practice_01_Manastyrskij\SDL2_practice_01_Manastyrskij.vcxproj", "{705B82BD-C17B-4E49-AEF5-62EC13476B2D}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SDL2_Animation_02", "SDL2_Animation_02\SDL2_Animation_02.vcxproj", "{84B7C51B-2824-46AE-BF56-909D54408641}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -51,6 +53,14 @@ Global
 		{705B82BD-C17B-4E49-AEF5-62EC13476B2D}.Release|x64.Build.0 = Release|x64
 		{705B82BD-C17B-4E49-AEF5-62EC13476B2D}.Release|x86.ActiveCfg = Release|Win32
 		{705B82BD-C17B-4E49-AEF5-62EC13476B2D}.Release|x86.Build.0 = Release|Win32
+		{84B7C51B-2824-46AE-BF56-909D54408641}.Debug|x64.ActiveCfg = Debug|x64
+		{84B7C51B-2824-46AE-BF56-909D54408641}.Debug|x64.Build.0 = Debug|x64
+		{84B7C51B-2824-46AE-BF56-909D54408641}.Debug|x86.ActiveCfg = Debug|Win32
+		{84B7C51B-2824-46AE-BF56-909D54408641}.Debug|x86.Build.0 = Debug|Win32
+		{84B7C51B-2824-46AE-BF56-909D54408641}.Release|x64.ActiveCfg = Release|x64
+		{84B7C51B-2824-46AE-BF56-909D54408641}.Release|x64.Build.0 = Release|x64
+		{84B7C51B-2824-46AE-BF56-909D54408641}.Release|x86.ActiveCfg = Release|Win32
+		{84B7C51B-2824-46AE-BF56-909D54408641}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -141,10 +141,17 @@ void Snake(const Uint8* keyboard, const int snake_size, SDL_Rect* snake, SDL_Rec
 	}
 	snake_delay_counter++;
 
-
+	
 	SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
 	for (int i = 0; i < snake_size; i++)
 		SDL_RenderFillRect(renderer, &snake[i]);
+
+	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+	for (int i = 1; i < snake_size; i++)
+		SDL_RenderDrawRect(renderer, &snake[i]);
+
+	SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+	SDL_RenderDrawRect(renderer, &snake[0]);
 }
 
 void Event(SDL_Event& event, bool& launched)
@@ -182,7 +189,7 @@ int main(int argc, char* argv[])
 	#pragma region VAR DROPS
 	const int drop_count = 50;
 	Drop drop[drop_count];
-	float drop_speed = 45.0;
+	float drop_speed = 25.0;
 	float drop_angle = 45.0;
 	float drop_length = 100.0;
 	

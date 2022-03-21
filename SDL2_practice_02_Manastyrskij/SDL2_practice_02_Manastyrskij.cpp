@@ -92,7 +92,7 @@ void DrawDrop(const int drop_count, Drop drop[], float drop_angle, float drop_le
 	}
 }
 
-void GenerateStartPositionForSnakeOnCenter(SDL_Rect snake[], int snake_size, int snake_scale)
+void GenerateStartPositionForSnakeOnCenter(int snake_size, SDL_Rect snake[], DirectionSnake& snake_direction, int snake_scale)
 {
 	for (int i = 0, j = 0; i < snake_size; i++, j += snake_scale)
 	{
@@ -101,6 +101,7 @@ void GenerateStartPositionForSnakeOnCenter(SDL_Rect snake[], int snake_size, int
 		snake[i].w = snake_scale;
 		snake[i].h = snake_scale;
 	}
+	snake_direction = up;
 }
 
 void Snake(const Uint8* keyboard, const int snake_delay, const int snake_size, SDL_Rect* snake, SDL_Rect* snake_temp, DirectionSnake& snake_direction, int snake_scale)
@@ -108,9 +109,9 @@ void Snake(const Uint8* keyboard, const int snake_delay, const int snake_size, S
 	static int snake_delay_counter = 0;
 
 	if (keyboard[SDL_SCANCODE_UP] and snake_direction != down) snake_direction = up;
-	if (keyboard[SDL_SCANCODE_DOWN] and snake_direction != up) snake_direction = down;
-	if (keyboard[SDL_SCANCODE_LEFT] and snake_direction != right) snake_direction = left;
-	if (keyboard[SDL_SCANCODE_RIGHT] and snake_direction != left) snake_direction = right;
+	else if (keyboard[SDL_SCANCODE_DOWN] and snake_direction != up) snake_direction = down;
+	else if (keyboard[SDL_SCANCODE_LEFT] and snake_direction != right) snake_direction = left;
+	else if (keyboard[SDL_SCANCODE_RIGHT] and snake_direction != left) snake_direction = right;
 
 	if (snake_delay_counter == snake_delay)
 	{
@@ -146,9 +147,15 @@ void Snake(const Uint8* keyboard, const int snake_delay, const int snake_size, S
 		else if (snake[0].x >= w) snake[0].x = 0;
 		else if (snake[0].y <= -snake_scale) snake[0].y = h - snake_scale;
 		else if (snake[0].y >= h) snake[0].y = 0;
+
+		for (int i = 1; i < snake_size; i++)
+			if (snake[0].x == snake[i].x and snake[0].y == snake[i].y)
+			{
+				GenerateStartPositionForSnakeOnCenter(snake_size, snake, snake_direction, snake_scale);
+				printf("Snake died\n");
+			}
 	}
 	snake_delay_counter++;
-
 
 	SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
 	for (int i = 0; i < snake_size; i++)
@@ -184,18 +191,15 @@ int main(int argc, char* argv[])
 	const Uint8* keyboard = SDL_GetKeyboardState(NULL);
 	SDL_Event event;
 
-	bool HideConsole = true;
-	if (HideConsole)
-	{
-		HWND HC;
-		AllocConsole();
-		HC = FindWindowA("ConsoleWindowClass", NULL);
-		ShowWindow(HC, 0);
-	}
+	bool HideConsole = false;
+	HWND HC;
+	AllocConsole();
+	HC = FindWindowA("ConsoleWindowClass", NULL);
+	ShowWindow(HC, !HideConsole);
 #pragma endregion
 
 #pragma region VAR DROPS
-	const int drop_count = 100;
+	const int drop_count = 10;
 	Drop drop[drop_count];
 	float drop_angle = 60.0;
 	float drop_length = 100.0;
@@ -204,13 +208,13 @@ int main(int argc, char* argv[])
 #pragma endregion
 
 #pragma region VAR SNAKE
-	const int snake_delay = 5;
-	const int snake_size = 3;
+	const int snake_delay = 8;
+	const int snake_size = 5;
 	SDL_Rect snake[snake_size];
 	SDL_Rect snake_temp[snake_size - 1];
-	DirectionSnake snake_direction = up;
+	DirectionSnake snake_direction;
 	int snake_scale = 20;
-	GenerateStartPositionForSnakeOnCenter(snake, snake_size, snake_scale);
+	GenerateStartPositionForSnakeOnCenter(snake_size, snake, snake_direction, snake_scale);
 #pragma endregion
 
 	while (launched)

@@ -2,10 +2,12 @@
 #include<iostream>
 #include<Windows.h>
 
+#define OUTPUT_HANDLE -11
+
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
 
-int w = 1300, h = 800;
+int w = 1000, h = 800;
 
 float radian = M_PI / 180.0;
 
@@ -29,7 +31,7 @@ struct Ball {
 	int y;
 	int radius;
 	int angle;
-	float speed;
+	int speed;
 	Color color;
 	bool direction_x;
 	bool direction_y;
@@ -38,6 +40,7 @@ struct Ball {
 struct Oval {
 	int radius;
 	int speed;
+	int tracer_length;
 	float angle;
 	Color color;
 };
@@ -76,7 +79,7 @@ void Init()
 	}
 }
 
-void Event(SDL_Event& event, bool& launched)
+void Event(SDL_Event& event, bool& launched, bool& drop_launched, bool& snake_launched, bool& ball_launched, bool& ball_mode, bool& oval_launched)
 {
 	while (SDL_PollEvent(&event))
 	{
@@ -84,8 +87,121 @@ void Event(SDL_Event& event, bool& launched)
 		{
 		case SDL_QUIT:
 			launched = false;
+		case SDL_KEYDOWN:
+			switch (event.key.keysym.scancode)
+			{
+			case SDL_SCANCODE_1:
+				if (!drop_launched)
+					drop_launched = true;
+				else
+					drop_launched = false;
+				break;
+			case SDL_SCANCODE_2:
+				if (!snake_launched)
+					snake_launched = true;
+				else
+					snake_launched = false;
+				break;
+			case SDL_SCANCODE_3:
+				if (!ball_launched)
+					ball_launched = true;
+				else
+					ball_launched = false;
+				break;
+			case SDL_SCANCODE_E:
+				if (!ball_mode) 
+					ball_mode = true;
+				else 
+					ball_mode = false;
+				break;
+			case SDL_SCANCODE_4:
+				if (!oval_launched)
+					oval_launched = true;
+				else
+					oval_launched = false;
+				break;
+			}
+
+			system("cls");
+
+			SetConsoleTextAttribute(GetStdHandle(OUTPUT_HANDLE), 15);
+			printf("\t[1] Drop \t");
+			if (drop_launched)
+			{
+				SetConsoleTextAttribute(GetStdHandle(OUTPUT_HANDLE), 11);
+				printf("launched\n");
+			}
+			else
+			{
+				SetConsoleTextAttribute(GetStdHandle(OUTPUT_HANDLE), 12);
+				printf("unlaunched\n");
+			}
+
+			SetConsoleTextAttribute(GetStdHandle(OUTPUT_HANDLE), 15);
+			printf("\t[2] Snake\t");
+			if (snake_launched)
+			{
+				SetConsoleTextAttribute(GetStdHandle(OUTPUT_HANDLE), 11);
+				printf("launched\t");
+				SetConsoleTextAttribute(GetStdHandle(OUTPUT_HANDLE), 15);
+				printf("[UP, DOWN, LEFT, RIGHT] Direction\n");
+			}
+			else
+			{
+				SetConsoleTextAttribute(GetStdHandle(OUTPUT_HANDLE), 12);
+				printf("unlaunched\n");
+			}
+
+			SetConsoleTextAttribute(GetStdHandle(OUTPUT_HANDLE), 15);
+			printf("\t[3] Ball \t");
+			if (ball_launched)
+			{
+				SetConsoleTextAttribute(GetStdHandle(OUTPUT_HANDLE), 11);
+				printf("launched\t\t\t    ");
+				SetConsoleTextAttribute(GetStdHandle(OUTPUT_HANDLE), 15);
+				printf("[E] Mode\t\t");
+				if (ball_mode)
+				{
+					SetConsoleTextAttribute(GetStdHandle(OUTPUT_HANDLE), 11);
+					printf("auto\n");
+				}
+				else
+				{
+					SetConsoleTextAttribute(GetStdHandle(OUTPUT_HANDLE), 12);
+					printf("non-auto\t");
+					SetConsoleTextAttribute(GetStdHandle(OUTPUT_HANDLE), 15);
+					printf("[SPACE] Boost\n");
+				}
+			}
+			else
+			{
+				SetConsoleTextAttribute(GetStdHandle(OUTPUT_HANDLE), 12);
+				printf("unlaunched\n");
+			}
+
+			SetConsoleTextAttribute(GetStdHandle(OUTPUT_HANDLE), 15);
+			printf("\t[4] Oval \t");
+			if (oval_launched)
+			{
+
+				SetConsoleTextAttribute(GetStdHandle(OUTPUT_HANDLE), 11);
+				printf("launched\n");
+			}
+			else
+			{
+				SetConsoleTextAttribute(GetStdHandle(OUTPUT_HANDLE), 12);
+				printf("unlaunched\n");
+			}
+			SetConsoleTextAttribute(GetStdHandle(OUTPUT_HANDLE), 7);
 		}
+		
 	}
+}
+
+void Background(int color_red, int color_green, int color_blue)
+{
+	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+	SDL_RenderClear(renderer);
 }
 
 void CreateDrop(const int drop_count, Drop drop[])
@@ -182,7 +298,7 @@ void SnakeF(const Uint8* keyboard, const int snake_delay, const int snake_size, 
 			if (snake[0].x == snake[i].x and snake[0].y == snake[i].y)
 			{
 				CreateSnake(snake_size, snake, snake_direction, snake_scale);
-				printf("Snake died\n");
+				//printf("Snake died\n");
 			}
 	}
 	snake_delay_counter++;
@@ -199,11 +315,21 @@ void SnakeF(const Uint8* keyboard, const int snake_delay, const int snake_size, 
 	SDL_RenderDrawRect(renderer, &snake[0]);
 }
 
+void Circle(int circle_position_x, int circle_position_y, int radius, int circle_color_red, int circle_color_green, int cirle_color_blue)
+{
+	SDL_SetRenderDrawColor(renderer, circle_color_red, circle_color_green, cirle_color_blue, 255);
+	do {
+		for (double angle = 0; angle <= 360; angle += 0.5)
+			SDL_RenderDrawPoint(renderer, circle_position_x + radius * cos(angle * radian), circle_position_y + radius * sin(angle * radian));
+		radius--;
+	} while (radius != 0);
+}
+
 void CreateBall(Ball& ball)
 {
 	ball.x = rand() % w / 4 + w / 2;
 	ball.y = rand() % h / 4 + h / 2;
-	ball.radius = 50;
+	ball.radius = rand() % 26 + 25;
 	ball.angle = rand() % 46 + 45;
 	ball.speed = rand() % 11 + 40;
 	ball.color.red = rand() % 256;
@@ -215,41 +341,35 @@ void CreateBall(Ball& ball)
 	else ball.direction_y = false;
 }
 
-void Circle(int circle_position_x, int circle_position_y, int radius, int circle_color_red, int circle_color_green, int cirle_color_blue)
-{
-	SDL_SetRenderDrawColor(renderer, circle_color_red, circle_color_green, cirle_color_blue, 255);
-	do {
-		for (double angle = 0; angle <= 360; angle += 0.5)
-			SDL_RenderDrawPoint(renderer, circle_position_x + radius * cos(angle * radian), circle_position_y + radius * sin(angle * radian));
-		radius--;
-	} while (radius != 0);
-}
-
-void BallF(const Uint8* keyboard, Ball& ball, float ball_speed_scale)
+void BallF(const Uint8* keyboard, Ball& ball, float ball_speed_scale, bool ball_mode)
 {
 	static float ball_first_speed = ball.speed;
 
 	Circle(ball.x, ball.y, ball.radius, ball.color.red, ball.color.green, ball.color.blue);
 
-	if (ball.x + ball.radius <= w and ball.direction_x == true) ball.x += cos(ball.angle * radian) * ball.speed * ball_speed_scale;
+	if (ball.x + ball.radius <= w and ball.direction_x == true) 
+		ball.x += cos(ball.angle * radian) * ball.speed * ball_speed_scale;
 	else
 		ball.direction_x = false;
 
-	if (ball.x - ball.radius >= 0 and ball.direction_x == false) ball.x -= cos(ball.angle * radian) * ball.speed * ball_speed_scale;
+	if (ball.x - ball.radius >= 0 and ball.direction_x == false) 
+		ball.x -= cos(ball.angle * radian) * ball.speed * ball_speed_scale;
 	else
 		ball.direction_x = true;
 
-	if (ball.y + ball.radius <= h and ball.direction_y == true) ball.y += sin(ball.angle * radian) * ball.speed * ball_speed_scale;
+	if (ball.y + ball.radius <= h and ball.direction_y == true) 
+		ball.y += sin(ball.angle * radian) * ball.speed * ball_speed_scale;
 	else
 		ball.direction_y = false;
 
-	if (ball.y - ball.radius >= 0 and ball.direction_y == false) ball.y -= sin(ball.angle * radian) * ball.speed * ball_speed_scale;
+	if (ball.y - ball.radius >= 0 and ball.direction_y == false)
+		ball.y -= sin(ball.angle * radian) * ball.speed * ball_speed_scale;
 	else
 		ball.direction_y = true;
-
-	ball.speed -= 0.5;
-	if (keyboard[SDL_SCANCODE_SPACE]) ball.speed += 1;
-	if (ball.speed <= 0) ball.speed = ball_first_speed;
+	
+	if (ball.speed > 0) ball.speed -= 1;
+	else if (keyboard[SDL_SCANCODE_SPACE] and !ball_mode) ball.speed = ball_first_speed;
+	else if (ball_mode) ball.speed = ball_first_speed;
 }
 
 void CreateOval(const int oval_count, Oval oval[])
@@ -258,6 +378,7 @@ void CreateOval(const int oval_count, Oval oval[])
 	{
 		oval[i].radius = rand() % 26 + 25;
 		oval[i].speed = rand() % 2 + 1;
+		oval[i].tracer_length = rand() % 25 + 10;
 		oval[i].angle = rand() % 361;
 		oval[i].color.red = rand() % 256;
 		oval[i].color.green = rand() % 256;
@@ -272,8 +393,12 @@ void OvalF(const int oval_count, Oval oval[], int oval_radius)
 		else oval[i].angle = 0;
 
 	for (int i = 0; i < oval_count; i++)
-		Circle(w / 2 + oval_radius * cos(oval[i].angle * radian), h / 2 + oval_radius * sin(oval[i].angle * radian) / 2, oval[i].radius,
-			oval[i].color.red, oval[i].color.green, oval[i].color.blue);
+	{
+		Circle(w / 2 + oval_radius * cos(oval[i].angle * radian), h / 2 + oval_radius * sin(oval[i].angle * radian) / 2, oval[i].radius, oval[i].color.red, oval[i].color.green, oval[i].color.blue);
+		SDL_SetRenderDrawColor(renderer, oval[i].color.red, oval[i].color.green, oval[i].color.blue, 255);
+		for (double j = oval[i].angle; j != oval[i].angle - oval[i].tracer_length; j -= 0.5)
+			SDL_RenderDrawPoint(renderer, w / 2 + oval_radius * cos(j * radian), h / 2 + oval_radius * sin(j * radian) / 2);
+	}
 }
 
 int main(int argc, char* argv[])
@@ -288,7 +413,7 @@ int main(int argc, char* argv[])
 
 	srand(time(NULL));
 
-	bool HideConsole = true;
+	bool HideConsole = false;
 	HWND HC;
 	AllocConsole();
 	HC = FindWindowA("ConsoleWindowClass", NULL);
@@ -296,51 +421,59 @@ int main(int argc, char* argv[])
 #pragma endregion
 
 #pragma region VAR DROP
-	const int drop_count = 100;
+	const int drop_count = 50;
 	Drop drop[drop_count];
 	float drop_angle = 60.0;
 	float drop_length = 100.0;
 	float drop_speed_scale = 1.0;
 	CreateDrop(drop_count, drop);
+
+	bool drop_launched = false;
 #pragma endregion
 
 #pragma region VAR SNAKE
 	const int snake_delay = 3;
-	const int snake_size = 3;
+	const int snake_size = 8;
 	SDL_Rect snake[snake_size];
 	SDL_Rect snake_temp[snake_size - 1];
 	DirectionSnake snake_direction;
 	int snake_scale = 20;
 	CreateSnake(snake_size, snake, snake_direction, snake_scale);
+
+	bool snake_launched = false;
 #pragma endregion
 
 #pragma region VAR BALL
 	Ball ball;
 	float ball_speed_scale = 1.5;
 	CreateBall(ball);
+
+	bool ball_launched = false;
+	bool ball_mode = true;
 #pragma endregion
 
 #pragma region VAR OVAL
-	const int oval_count = 2;
+	const int oval_count = 3;
 	Oval oval[oval_count];
 	int oval_radius = 500;
 	CreateOval(oval_count, oval);
+
+	bool oval_launched = false;
 #pragma endregion
 
 	while (launched)
 	{
-		Event(event, launched);
+		Event(event, launched, drop_launched, snake_launched, ball_launched, ball_mode, oval_launched);
 
-		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-		SDL_RenderClear(renderer);
+		Background(0, 0, 0);
 
-		//DropF(drop_count, drop, drop_angle, drop_length, drop_speed_scale);
+		if (drop_launched) DropF(drop_count, drop, drop_angle, drop_length, drop_speed_scale);
 
-		BallF(keyboard, ball, ball_speed_scale);
+		if (ball_launched) BallF(keyboard, ball, ball_speed_scale, ball_mode);
 
-		//OvalF(oval_count, oval, oval_radius);
+		if (oval_launched) OvalF(oval_count, oval, oval_radius);
 
-		//SnakeF(keyboard, snake_delay, snake_size, snake, snake_temp, snake_direction, snake_scale);
+		if (snake_launched) SnakeF(keyboard, snake_delay, snake_size, snake, snake_temp, snake_direction, snake_scale);
 
 		SDL_RenderPresent(renderer);
 		SDL_Delay(1000 / fps);

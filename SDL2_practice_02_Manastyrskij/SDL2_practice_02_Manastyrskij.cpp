@@ -79,7 +79,68 @@ void Init()
 	}
 }
 
-void Event(SDL_Event& event, bool& launched, bool& drop_launched, bool& snake_launched, bool& ball_launched, bool& ball_mode, bool& oval_launched)
+/*
+ * 7 - DEFAULT
+ * 10 - GREEN
+ * 11 - BLUE
+ * 12 - RED
+ * 15 - WHITE
+ */
+
+void ColoredPrint(const char* text, int color)
+{
+	SetConsoleTextAttribute(GetStdHandle(OUTPUT_HANDLE), color);
+	printf("%s", text);
+	SetConsoleTextAttribute(GetStdHandle(OUTPUT_HANDLE), 7);
+}
+
+void EventPrint(bool HideConsole, bool drop_launched, bool snake_launched, bool ball_launched, bool ball_mode, bool oval_launched)
+{
+	if (!HideConsole)
+	{
+		system("cls");
+		ColoredPrint("\t[1] Drop \t", 15);
+		if (drop_launched)
+			ColoredPrint("launched\n", 11);
+		else
+			ColoredPrint("unlaunched\n", 12);
+
+		ColoredPrint("\t[2] Snake\t", 15);
+		if (snake_launched)
+		{
+			ColoredPrint("launched\t", 11);
+			ColoredPrint("[UP, DOWN, LEFT, RIGHT] Direction\n", 15);
+		}
+		else
+			ColoredPrint("unlaunched\n", 12);
+
+		ColoredPrint("\t[3] Ball \t", 15);
+		if (ball_launched)
+		{
+			ColoredPrint("launched\t\t\t    ", 11);
+			ColoredPrint("[E] Mode\t\t", 15);
+			if (ball_mode)
+			{
+				ColoredPrint("auto\n", 11);
+			}
+			else
+			{
+				ColoredPrint("non-auto\t", 12);
+				ColoredPrint("[SPACE] Boost\n", 15);
+			}
+		}
+		else
+			ColoredPrint("unlaunched\n", 12);
+
+		ColoredPrint("\t[4] Oval \t", 15);
+		if (oval_launched)
+			ColoredPrint("launched\n", 11);
+		else
+			ColoredPrint("unlaunched\n", 12);
+	}
+}
+
+void Event(SDL_Event& event, bool HideConsole, bool& launched, bool& drop_launched, bool& snake_launched, bool& ball_launched, bool& ball_mode, bool& oval_launched)
 {
 	while (SDL_PollEvent(&event))
 	{
@@ -109,9 +170,9 @@ void Event(SDL_Event& event, bool& launched, bool& drop_launched, bool& snake_la
 					ball_launched = false;
 				break;
 			case SDL_SCANCODE_E:
-				if (!ball_mode) 
+				if (!ball_mode)
 					ball_mode = true;
-				else 
+				else
 					ball_mode = false;
 				break;
 			case SDL_SCANCODE_4:
@@ -122,79 +183,8 @@ void Event(SDL_Event& event, bool& launched, bool& drop_launched, bool& snake_la
 				break;
 			}
 
-			system("cls");
-
-			SetConsoleTextAttribute(GetStdHandle(OUTPUT_HANDLE), 15);
-			printf("\t[1] Drop \t");
-			if (drop_launched)
-			{
-				SetConsoleTextAttribute(GetStdHandle(OUTPUT_HANDLE), 11);
-				printf("launched\n");
-			}
-			else
-			{
-				SetConsoleTextAttribute(GetStdHandle(OUTPUT_HANDLE), 12);
-				printf("unlaunched\n");
-			}
-
-			SetConsoleTextAttribute(GetStdHandle(OUTPUT_HANDLE), 15);
-			printf("\t[2] Snake\t");
-			if (snake_launched)
-			{
-				SetConsoleTextAttribute(GetStdHandle(OUTPUT_HANDLE), 11);
-				printf("launched\t");
-				SetConsoleTextAttribute(GetStdHandle(OUTPUT_HANDLE), 15);
-				printf("[UP, DOWN, LEFT, RIGHT] Direction\n");
-			}
-			else
-			{
-				SetConsoleTextAttribute(GetStdHandle(OUTPUT_HANDLE), 12);
-				printf("unlaunched\n");
-			}
-
-			SetConsoleTextAttribute(GetStdHandle(OUTPUT_HANDLE), 15);
-			printf("\t[3] Ball \t");
-			if (ball_launched)
-			{
-				SetConsoleTextAttribute(GetStdHandle(OUTPUT_HANDLE), 11);
-				printf("launched\t\t\t    ");
-				SetConsoleTextAttribute(GetStdHandle(OUTPUT_HANDLE), 15);
-				printf("[E] Mode\t\t");
-				if (ball_mode)
-				{
-					SetConsoleTextAttribute(GetStdHandle(OUTPUT_HANDLE), 11);
-					printf("auto\n");
-				}
-				else
-				{
-					SetConsoleTextAttribute(GetStdHandle(OUTPUT_HANDLE), 12);
-					printf("non-auto\t");
-					SetConsoleTextAttribute(GetStdHandle(OUTPUT_HANDLE), 15);
-					printf("[SPACE] Boost\n");
-				}
-			}
-			else
-			{
-				SetConsoleTextAttribute(GetStdHandle(OUTPUT_HANDLE), 12);
-				printf("unlaunched\n");
-			}
-
-			SetConsoleTextAttribute(GetStdHandle(OUTPUT_HANDLE), 15);
-			printf("\t[4] Oval \t");
-			if (oval_launched)
-			{
-
-				SetConsoleTextAttribute(GetStdHandle(OUTPUT_HANDLE), 11);
-				printf("launched\n");
-			}
-			else
-			{
-				SetConsoleTextAttribute(GetStdHandle(OUTPUT_HANDLE), 12);
-				printf("unlaunched\n");
-			}
-			SetConsoleTextAttribute(GetStdHandle(OUTPUT_HANDLE), 7);
+			EventPrint(HideConsole, drop_launched, snake_launched, ball_launched, ball_mode, oval_launched);
 		}
-		
 	}
 }
 
@@ -296,10 +286,7 @@ void SnakeF(const Uint8* keyboard, const int snake_delay, const int snake_size, 
 
 		for (int i = 1; i < snake_size; i++)
 			if (snake[0].x == snake[i].x and snake[0].y == snake[i].y)
-			{
 				CreateSnake(snake_size, snake, snake_direction, snake_scale);
-				//printf("Snake died\n");
-			}
 	}
 	snake_delay_counter++;
 
@@ -347,17 +334,17 @@ void BallF(const Uint8* keyboard, Ball& ball, float ball_speed_scale, bool ball_
 
 	Circle(ball.x, ball.y, ball.radius, ball.color.red, ball.color.green, ball.color.blue);
 
-	if (ball.x + ball.radius <= w and ball.direction_x == true) 
+	if (ball.x + ball.radius <= w and ball.direction_x == true)
 		ball.x += cos(ball.angle * radian) * ball.speed * ball_speed_scale;
 	else
 		ball.direction_x = false;
 
-	if (ball.x - ball.radius >= 0 and ball.direction_x == false) 
+	if (ball.x - ball.radius >= 0 and ball.direction_x == false)
 		ball.x -= cos(ball.angle * radian) * ball.speed * ball_speed_scale;
 	else
 		ball.direction_x = true;
 
-	if (ball.y + ball.radius <= h and ball.direction_y == true) 
+	if (ball.y + ball.radius <= h and ball.direction_y == true)
 		ball.y += sin(ball.angle * radian) * ball.speed * ball_speed_scale;
 	else
 		ball.direction_y = false;
@@ -366,7 +353,7 @@ void BallF(const Uint8* keyboard, Ball& ball, float ball_speed_scale, bool ball_
 		ball.y -= sin(ball.angle * radian) * ball.speed * ball_speed_scale;
 	else
 		ball.direction_y = true;
-	
+
 	if (ball.speed > 0) ball.speed -= 1;
 	else if (keyboard[SDL_SCANCODE_SPACE] and !ball_mode) ball.speed = ball_first_speed;
 	else if (ball_mode) ball.speed = ball_first_speed;
@@ -418,6 +405,8 @@ int main(int argc, char* argv[])
 	AllocConsole();
 	HC = FindWindowA("ConsoleWindowClass", NULL);
 	ShowWindow(HC, !HideConsole);
+	if(!HideConsole)
+		ColoredPrint("\t[1] Drop \n\t[2] Snake\n\t[3] Ball \n\t[4] Oval\n", 10);
 #pragma endregion
 
 #pragma region VAR DROP
@@ -463,7 +452,7 @@ int main(int argc, char* argv[])
 
 	while (launched)
 	{
-		Event(event, launched, drop_launched, snake_launched, ball_launched, ball_mode, oval_launched);
+		Event(event, HideConsole, launched, drop_launched, snake_launched, ball_launched, ball_mode, oval_launched);
 
 		Background(0, 0, 0);
 

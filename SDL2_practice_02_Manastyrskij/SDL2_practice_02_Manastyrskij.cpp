@@ -6,6 +6,8 @@
 #define WIDTH 1280
 #define HEIGHT 720
 
+SDL_Renderer* renderer = NULL;
+
 struct Color {
 	int red;
 	int green;
@@ -45,7 +47,7 @@ struct Oval {
 	Color color;
 };
 
-void DeInit(int error, SDL_Window* window, SDL_Renderer* renderer)
+void DeInit(int error, SDL_Window* window)
 {
 	if (renderer != NULL) SDL_DestroyRenderer(renderer);
 	if (window != NULL) SDL_DestroyWindow(window);
@@ -53,13 +55,13 @@ void DeInit(int error, SDL_Window* window, SDL_Renderer* renderer)
 	exit(error);
 }
 
-void Init(SDL_Window* window, SDL_Renderer* renderer)
+void Init(SDL_Window* window)
 {
 	if (SDL_Init(SDL_INIT_VIDEO) != NULL)
 	{
 		printf("SDL_Init error: %s", SDL_GetError());
 		system("pause");
-		DeInit(1, window, renderer);
+		DeInit(1, window);
 	}
 
 	window = SDL_CreateWindow("Practice", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIDTH, HEIGHT, SDL_WINDOW_SHOWN);
@@ -67,7 +69,7 @@ void Init(SDL_Window* window, SDL_Renderer* renderer)
 	{
 		printf("SDL_CreateWindow error: %s", SDL_GetError());
 		system("pause");
-		DeInit(1, window, renderer);
+		DeInit(1, window);
 	}
 
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
@@ -75,7 +77,7 @@ void Init(SDL_Window* window, SDL_Renderer* renderer)
 	{
 		printf("SDL_CreateRenderer error: %s", SDL_GetError());
 		system("pause");
-		DeInit(1, window, renderer);
+		DeInit(1, window);
 	}
 }
 
@@ -188,7 +190,7 @@ void Event(SDL_Event& event, bool HideConsole, bool& launched, bool& drop_launch
 	}
 }
 
-void Background(SDL_Renderer* renderer, int color_red, int color_green, int color_blue)
+void Background(int color_red, int color_green, int color_blue)
 {
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 	SDL_RenderClear(renderer);
@@ -225,7 +227,7 @@ void LogicDrop(const int drop_count, Drop drop[], float drop_angle, float drop_l
 	}
 }
 
-void DrawDrop(SDL_Renderer* renderer, const int drop_count, Drop drop[], float drop_angle, float drop_length)
+void DrawDrop(const int drop_count, Drop drop[], float drop_angle, float drop_length)
 {
 	for (int i = 0; i < drop_count; i++)
 	{
@@ -298,7 +300,7 @@ void LogicSnake(const Uint8* keyboard, const int snake_delay, const int snake_si
 	snake_delay_counter++;
 }
 
-void DrawSnake(SDL_Renderer* renderer, const int snake_size, SDL_Rect* snake, Color snake_color)
+void DrawSnake(const int snake_size, SDL_Rect* snake, Color snake_color)
 {
 	SDL_SetRenderDrawColor(renderer, snake_color.red, snake_color.green, snake_color.blue, 255);
 	for (int i = 0; i < snake_size; i++)
@@ -354,7 +356,7 @@ void LogicBall(const Uint8* keyboard, Ball& ball, float ball_speed_scale, bool b
 	else if (ball_mode) ball.speed = ball_first_speed;
 }
 
-void DrawBall(SDL_Renderer* renderer, int ball_position_x, int ball_position_y, int radius, int ball_color_red, int ball_color_green, int ball_color_blue)
+void DrawBall(int ball_position_x, int ball_position_y, int radius, int ball_color_red, int ball_color_green, int ball_color_blue)
 {
 	SDL_SetRenderDrawColor(renderer, ball_color_red, ball_color_green, ball_color_blue, 255);
 	do {
@@ -385,11 +387,11 @@ void LogicOval(const int oval_count, Oval oval[], int oval_radius)
 		else oval[i].angle = 0;
 }
 
-void DrawOval(SDL_Renderer* renderer, const int oval_count, Oval oval[], int oval_radius)
+void DrawOval(const int oval_count, Oval oval[], int oval_radius)
 {
 	for (int i = 0; i < oval_count; i++)
 	{
-		DrawBall(renderer, WIDTH / 2 + oval_radius * cos(oval[i].angle * M_PI / 180.0), HEIGHT / 2 + oval_radius * sin(oval[i].angle * M_PI / 180.0) / 2, oval[i].radius, oval[i].color.red, oval[i].color.green, oval[i].color.blue);
+		DrawBall(WIDTH / 2 + oval_radius * cos(oval[i].angle * M_PI / 180.0), HEIGHT / 2 + oval_radius * sin(oval[i].angle * M_PI / 180.0) / 2, oval[i].radius, oval[i].color.red, oval[i].color.green, oval[i].color.blue);
 		SDL_SetRenderDrawColor(renderer, oval[i].color.red, oval[i].color.green, oval[i].color.blue, 255);
 		for (double j = oval[i].angle; j != oval[i].angle - oval[i].tracer_length; j -= 0.5)
 			SDL_RenderDrawPoint(renderer, WIDTH / 2 + oval_radius * cos(j * M_PI / 180.0), HEIGHT / 2 + oval_radius * sin(j * M_PI / 180.0) / 2);
@@ -398,16 +400,17 @@ void DrawOval(SDL_Renderer* renderer, const int oval_count, Oval oval[], int ova
 
 int main(int argc, char* argv[])
 {
+#pragma region VAR SDL
 	SDL_Window* window = NULL;
-	SDL_Renderer* renderer = NULL;
+	const Uint8* keyboard = SDL_GetKeyboardState(NULL);
+	SDL_Event event;
+#pragma endregion
 
-	Init(window, renderer);
+	Init(window);
 
 #pragma region VAR
 	bool launched = true;
 	const int fps = 30;
-	const Uint8* keyboard = SDL_GetKeyboardState(NULL);
-	SDL_Event event;
 
 	srand(time(NULL));
 
@@ -466,36 +469,36 @@ int main(int argc, char* argv[])
 	{
 		Event(event, HideConsole, launched, drop_launched, snake_launched, ball_launched, ball_mode, oval_launched);
 
-		Background(renderer, 0, 0, 0);
+		Background(0, 0, 0);
 
 		if (drop_launched)
 		{
 			LogicDrop(drop_count, drop, drop_angle, drop_length, drop_speed_scale);
-			DrawDrop(renderer, drop_count, drop, drop_angle, drop_length);
+			DrawDrop(drop_count, drop, drop_angle, drop_length);
 		}
 
 		if (ball_launched)
 		{
 			LogicBall(keyboard, ball, ball_speed_scale, ball_mode);
-			DrawBall(renderer, ball.x, ball.y, ball.radius, ball.color.red, ball.color.green, ball.color.blue);
+			DrawBall(ball.x, ball.y, ball.radius, ball.color.red, ball.color.green, ball.color.blue);
 		}
 
 		if (oval_launched)
 		{
 			LogicOval(oval_count, oval, oval_radius);
-			DrawOval(renderer, oval_count, oval, oval_radius);
+			DrawOval(oval_count, oval, oval_radius);
 		}
 
 		if (snake_launched)
 		{
 			LogicSnake(keyboard, snake_delay, snake_size, snake, snake_temp, snake_direction, snake_scale);
-			DrawSnake(renderer, snake_size, snake, snake_color);
+			DrawSnake(snake_size, snake, snake_color);
 		}
 
 		SDL_RenderPresent(renderer);
 		SDL_Delay(1000 / fps);
 	}
 
-	DeInit(0, window, renderer);
+	DeInit(0, window);
 	return 0;
 }

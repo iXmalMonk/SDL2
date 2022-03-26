@@ -241,6 +241,7 @@ void CreateSnake(int snake_size, SDL_Rect snake[], DirectionSnake& snake_directi
 		snake[i].w = snake_scale;
 		snake[i].h = snake_scale;
 	}
+
 	snake_direction = up;
 }
 
@@ -295,18 +296,15 @@ void LogicSnake(const Uint8* keyboard, const int snake_delay, const int snake_si
 	snake_delay_counter++;
 }
 
-void DrawSnake(const int snake_size, SDL_Rect* snake)
+void DrawSnake(const int snake_size, SDL_Rect* snake, Color snake_color)
 {
-	SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+	SDL_SetRenderDrawColor(renderer, snake_color.red, snake_color.green, snake_color.blue, 255);
 	for (int i = 0; i < snake_size; i++)
 		SDL_RenderFillRect(renderer, &snake[i]);
 
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 	for (int i = 1; i < snake_size; i++)
 		SDL_RenderDrawRect(renderer, &snake[i]);
-
-	SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-	SDL_RenderDrawRect(renderer, &snake[0]);
 }
 
 void CreateBall(Ball& ball)
@@ -433,6 +431,7 @@ int main(int argc, char* argv[])
 	const int snake_size = 8;
 	SDL_Rect snake[snake_size];
 	SDL_Rect snake_temp[snake_size - 1];
+	Color snake_color = { rand() % 256, rand() % 256, rand() % 256 };
 	DirectionSnake snake_direction;
 	int snake_scale = 20;
 	CreateSnake(snake_size, snake, snake_direction, snake_scale);
@@ -485,7 +484,7 @@ int main(int argc, char* argv[])
 		if (snake_launched)
 		{
 			LogicSnake(keyboard, snake_delay, snake_size, snake, snake_temp, snake_direction, snake_scale);
-			DrawSnake(snake_size, snake);
+			DrawSnake(snake_size, snake, snake_color);
 		}
 
 		SDL_RenderPresent(renderer);

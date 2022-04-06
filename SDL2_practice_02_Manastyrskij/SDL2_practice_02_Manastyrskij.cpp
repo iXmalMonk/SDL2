@@ -33,8 +33,8 @@ struct Ball {
 	int angle;
 	int speed;
 	Color color;
-	bool direction_x;
-	bool direction_y;
+	int direction_x;
+	int direction_y;
 };
 
 struct Oval {
@@ -104,7 +104,7 @@ void Init(SDL_Window*& window, SDL_Renderer*& renderer)
 	}
 }
 
-void EventPrint(bool HideConsole, bool drop_launched, bool snake_launched, bool ball_launched, bool ball_mode, bool oval_launched)
+void EventPrint(bool HideConsole, bool drop_launched, bool snake_launched, bool ball_launched, bool oval_launched)
 {
 	if (!HideConsole)
 	{
@@ -126,19 +126,7 @@ void EventPrint(bool HideConsole, bool drop_launched, bool snake_launched, bool 
 
 		ColoredPrint("\t[3] Ball \t", 15);
 		if (ball_launched)
-		{
-			ColoredPrint("launched\t\t\t    ", 11);
-			ColoredPrint("[E] Mode\t\t", 15);
-			if (ball_mode)
-			{
-				ColoredPrint("auto\n", 11);
-			}
-			else
-			{
-				ColoredPrint("non-auto\t", 12);
-				ColoredPrint("[SPACE] Boost\n", 15);
-			}
-		}
+			ColoredPrint("launched\n", 11);
 		else
 			ColoredPrint("unlaunched\n", 12);
 
@@ -150,7 +138,7 @@ void EventPrint(bool HideConsole, bool drop_launched, bool snake_launched, bool 
 	}
 }
 
-void Event(SDL_Event& event, bool HideConsole, bool& launched, bool& drop_launched, bool& snake_launched, bool& ball_launched, bool& ball_mode, bool& oval_launched)
+void Event(SDL_Event& event, bool HideConsole, bool& launched, bool& drop_launched, bool& snake_launched, bool& ball_launched, bool& oval_launched)
 {
 	while (SDL_PollEvent(&event))
 	{
@@ -179,12 +167,6 @@ void Event(SDL_Event& event, bool HideConsole, bool& launched, bool& drop_launch
 				else
 					ball_launched = false;
 				break;
-			case SDL_SCANCODE_E:
-				if (!ball_mode)
-					ball_mode = true;
-				else
-					ball_mode = false;
-				break;
 			case SDL_SCANCODE_4:
 				if (!oval_launched)
 					oval_launched = true;
@@ -193,7 +175,7 @@ void Event(SDL_Event& event, bool HideConsole, bool& launched, bool& drop_launch
 				break;
 			}
 
-			EventPrint(HideConsole, drop_launched, snake_launched, ball_launched, ball_mode, oval_launched);
+			EventPrint(HideConsole, drop_launched, snake_launched, ball_launched, oval_launched);
 		}
 	}
 }
@@ -324,44 +306,41 @@ void CreateBall(Ball& ball)
 	ball.x = rand() % WIDTH / 4 + WIDTH / 2;
 	ball.y = rand() % HEIGHT / 4 + HEIGHT / 2;
 	ball.radius = rand() % 26 + 25;
-	ball.angle = rand() % 46 + 45;
-	ball.speed = rand() % 11 + 40;
+	ball.angle = rand() % 91 + 90 * (rand() % 3 + 1);
+	ball.speed = rand() % 11 + 5;
 	ball.color.red = rand() % 256;
 	ball.color.green = rand() % 256;
 	ball.color.blue = rand() % 256;
-	if (rand() % 2 == 0) ball.direction_x = true;
-	else ball.direction_x = false;
-	if (rand() % 2 == 0) ball.direction_y = true;
-	else ball.direction_y = false;
+	ball.direction_x = 1;
+	ball.direction_y = 1;
 }
 
-void LogicBall(const Uint8* keyboard, Ball& ball, float ball_speed_scale, bool ball_mode)
+void LogicBall(const Uint8* keyboard, Ball& ball, float ball_speed_scale)
 {
-	static float ball_first_speed = ball.speed;
+	ball.x += (cos(ball.angle * M_PI / 180.0) * ball.speed * ball_speed_scale) * ball.direction_x;
+	ball.y += (sin(ball.angle * M_PI / 180.0) * ball.speed * ball_speed_scale) * ball.direction_y;
 
-	if (ball.x + ball.radius <= WIDTH and ball.direction_x == true)
-		ball.x += cos(ball.angle * M_PI / 180.0) * ball.speed * ball_speed_scale;
-	else
-		ball.direction_x = false;
+	if (ball.x + ball.radius >= WIDTH)
+	{
+		ball.x = WIDTH - ball.radius;
+		ball.direction_x *= -1;
+	}
+	else if (ball.x - ball.radius <= 0)
+	{
+		ball.x = ball.radius;
+		ball.direction_x *= -1;
+	}
 
-	if (ball.x - ball.radius >= 0 and ball.direction_x == false)
-		ball.x -= cos(ball.angle * M_PI / 180.0) * ball.speed * ball_speed_scale;
-	else
-		ball.direction_x = true;
-
-	if (ball.y + ball.radius <= HEIGHT and ball.direction_y == true)
-		ball.y += sin(ball.angle * M_PI / 180.0) * ball.speed * ball_speed_scale;
-	else
-		ball.direction_y = false;
-
-	if (ball.y - ball.radius >= 0 and ball.direction_y == false)
-		ball.y -= sin(ball.angle * M_PI / 180.0) * ball.speed * ball_speed_scale;
-	else
-		ball.direction_y = true;
-
-	if (ball.speed > 0) ball.speed -= 1;
-	else if (keyboard[SDL_SCANCODE_SPACE] and !ball_mode) ball.speed = ball_first_speed;
-	else if (ball_mode) ball.speed = ball_first_speed;
+	if (ball.y + ball.radius >= HEIGHT)
+	{
+		ball.y = HEIGHT - ball.radius;
+		ball.direction_y *= -1;
+	}
+	else if (ball.y - ball.radius <= 0)
+	{
+		ball.y = ball.radius;
+		ball.direction_y *= -1;
+	}
 }
 
 void DrawBall(SDL_Renderer* renderer, int ball_position_x, int ball_position_y, int radius, int ball_color_red, int ball_color_green, int ball_color_blue)
@@ -419,7 +398,7 @@ int main(int argc, char* argv[])
 
 #pragma region VAR
 	bool launched = true;
-	const int fps = 30;
+	const int fps = 60;
 
 	srand(time(NULL));
 
@@ -462,7 +441,6 @@ int main(int argc, char* argv[])
 	CreateBall(ball);
 
 	bool ball_launched = false;
-	bool ball_mode = true;
 #pragma endregion
 
 #pragma region VAR OVAL
@@ -476,7 +454,7 @@ int main(int argc, char* argv[])
 
 	while (launched)
 	{
-		Event(event, HideConsole, launched, drop_launched, snake_launched, ball_launched, ball_mode, oval_launched);
+		Event(event, HideConsole, launched, drop_launched, snake_launched, ball_launched, oval_launched);
 
 		Background(renderer, 0, 0, 0);
 
@@ -488,7 +466,7 @@ int main(int argc, char* argv[])
 
 		if (ball_launched)
 		{
-			LogicBall(keyboard, ball, ball_speed_scale, ball_mode);
+			LogicBall(keyboard, ball, ball_speed_scale);
 			DrawBall(renderer, ball.x, ball.y, ball.radius, ball.color.red, ball.color.green, ball.color.blue);
 		}
 

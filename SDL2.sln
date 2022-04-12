@@ -17,6 +17,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SDL2_practice_02_Manastyrsk
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SDL2_Image_03", "SDL2_Image_03\SDL2_Image_03.vcxproj", "{DC10C85B-3425-478E-8DF2-B3984F36F30E}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Top-Down Shooter", "Top-Down Shooter\Top-Down Shooter.vcxproj", "{6B44BF78-EAEB-4DF3-9AFB-444D11B7BE33}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -81,6 +83,14 @@ Global
 		{DC10C85B-3425-478E-8DF2-B3984F36F30E}.Release|x64.Build.0 = Release|x64
 		{DC10C85B-3425-478E-8DF2-B3984F36F30E}.Release|x86.ActiveCfg = Release|Win32
 		{DC10C85B-3425-478E-8DF2-B3984F36F30E}.Release|x86.Build.0 = Release|Win32
+		{6B44BF78-EAEB-4DF3-9AFB-444D11B7BE33}.Debug|x64.ActiveCfg = Debug|x64
+		{6B44BF78-EAEB-4DF3-9AFB-444D11B7BE33}.Debug|x64.Build.0 = Debug|x64
+		{6B44BF78-EAEB-4DF3-9AFB-444D11B7BE33}.Debug|x86.ActiveCfg = Debug|Win32
+		{6B44BF78-EAEB-4DF3-9AFB-444D11B7BE33}.Debug|x86.Build.0 = Debug|Win32
+		{6B44BF78-EAEB-4DF3-9AFB-444D11B7BE33}.Release|x64.ActiveCfg = Release|x64
+		{6B44BF78-EAEB-4DF3-9AFB-444D11B7BE33}.Release|x64.Build.0 = Release|x64
+		{6B44BF78-EAEB-4DF3-9AFB-444D11B7BE33}.Release|x86.ActiveCfg = Release|Win32
+		{6B44BF78-EAEB-4DF3-9AFB-444D11B7BE33}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
